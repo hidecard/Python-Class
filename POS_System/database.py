@@ -68,6 +68,12 @@ class Database:
                     date DATETIME
                 )
             """)
+            # Add staff_id column if not exists
+            try:
+                cursor.execute("ALTER TABLE safe_transactions ADD COLUMN staff_id INT")
+                cursor.execute("ALTER TABLE safe_transactions ADD CONSTRAINT fk_safe_staff FOREIGN KEY (staff_id) REFERENCES staff(id)")
+            except mysql.connector.Error:
+                pass  # Column or constraint may already exist
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS sales (
                     id INT AUTO_INCREMENT PRIMARY KEY,

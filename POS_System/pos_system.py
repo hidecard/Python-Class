@@ -8,7 +8,7 @@ from dashboard_frame import DashboardFrame
 from category_crud_frame import CategoryCRUDFrame
 from item_crud_frame import ItemCRUDFrame
 from staff_crud_frame import StaffCRUDFrame
-from safe_page_frame import SafePageFrame
+from pos_sales_frame import POSSalesFrame
 from safe_list_frame import SafeListFrame
 
 class POSApp:
@@ -30,7 +30,7 @@ class POSApp:
         self.frames["CategoryCRUD"] = CategoryCRUDFrame(self.root, self, self.db)
         self.frames["ItemCRUD"] = ItemCRUDFrame(self.root, self, self.db)
         self.frames["StaffCRUD"] = StaffCRUDFrame(self.root, self, self.db)
-        self.frames["SafePage"] = SafePageFrame(self.root, self, self.db)
+        self.frames["POS"] = POSSalesFrame(self.root, self, self.db)
         self.frames["SafeList"] = SafeListFrame(self.root, self, self.db)
 
         for frame in self.frames.values():

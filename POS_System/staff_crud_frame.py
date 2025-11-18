@@ -7,23 +7,60 @@ class StaffCRUDFrame(tk.Frame):
         self.controller = controller
         self.db = db
 
-        tk.Label(self, text="Staff Management").pack(pady=10)
-        tk.Label(self, text="Name:").pack(pady=5)
-        self.staff_name_entry = tk.Entry(self)
-        self.staff_name_entry.pack(pady=5)
-        tk.Label(self, text="Role:").pack(pady=5)
-        self.staff_role_entry = tk.Entry(self)
-        self.staff_role_entry.pack(pady=5)
-        tk.Button(self, text="Create", command=self.create_staff).pack(pady=5)
-        tk.Button(self, text="Update", command=self.update_staff).pack(pady=5)
-        tk.Button(self, text="Delete", command=self.delete_staff).pack(pady=5)
-        self.staff_tree = ttk.Treeview(self, columns=("ID", "Name", "Role"), show="headings")
+        # Title
+        title_label = tk.Label(self, text="Staff Management", font=("Arial", 16, "bold"))
+        title_label.pack(pady=20)
+
+        # Input frame
+        input_frame = tk.Frame(self)
+        input_frame.pack(pady=10)
+
+        tk.Label(input_frame, text="Staff Name:", font=("Arial", 10, "bold")).grid(row=0, column=0, sticky="w", pady=5)
+        self.staff_name_entry = tk.Entry(input_frame, font=("Arial", 12), width=25)
+        self.staff_name_entry.grid(row=0, column=1, pady=5, padx=10)
+
+        tk.Label(input_frame, text="Role:", font=("Arial", 10, "bold")).grid(row=1, column=0, sticky="w", pady=5)
+        self.staff_role_entry = tk.Entry(input_frame, font=("Arial", 12), width=25)
+        self.staff_role_entry.grid(row=1, column=1, pady=5, padx=10)
+
+        # Buttons frame
+        button_frame = tk.Frame(input_frame)
+        button_frame.grid(row=2, column=0, columnspan=2, pady=10)
+
+        tk.Button(button_frame, text="Create", bg="#4CAF50", fg="white", width=10,
+                 command=self.create_staff).grid(row=0, column=0, padx=5)
+        tk.Button(button_frame, text="Update", bg="#2196F3", fg="white", width=10,
+                 command=self.update_staff).grid(row=0, column=1, padx=5)
+        tk.Button(button_frame, text="Delete", bg="#f44336", fg="white", width=10,
+                 command=self.delete_staff).grid(row=0, column=2, padx=5)
+        tk.Button(button_frame, text="Back to Dashboard", bg="#607d8b", fg="white", width=15,
+                 command=lambda: self.controller.show_frame("Dashboard")).grid(row=0, column=3, padx=5)
+
+        # Treeview
+        tree_frame = tk.Frame(self)
+        tree_frame.pack(pady=10, fill="both", expand=True)
+
+        self.staff_tree = ttk.Treeview(tree_frame, columns=("ID", "Name", "Role"), show="headings", height=15)
         self.staff_tree.heading("ID", text="ID")
         self.staff_tree.heading("Name", text="Name")
         self.staff_tree.heading("Role", text="Role")
-        self.staff_tree.pack(pady=10)
-        tk.Button(self, text="Refresh", command=self.load_staff).pack(pady=5)
-        tk.Button(self, text="Back", command=lambda: self.controller.show_frame("Dashboard")).pack(pady=5)
+        self.staff_tree.column("ID", width=80)
+        self.staff_tree.column("Name", width=200)
+        self.staff_tree.column("Role", width=150)
+
+        scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=self.staff_tree.yview)
+        self.staff_tree.configure(yscrollcommand=scrollbar.set)
+
+        self.staff_tree.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Bottom buttons
+        bottom_frame = tk.Frame(self)
+        bottom_frame.pack(pady=10)
+
+        tk.Button(bottom_frame, text="Refresh", width=15, command=self.load_staff).grid(row=0, column=0, padx=5)
+
+
 
     def create_staff(self):
         name = self.staff_name_entry.get()
