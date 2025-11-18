@@ -1,0 +1,4 @@
+- [x] Create file_handling.py with examples for txt, csv, json file I/O (modes: r, w, a, r+)
+- [x] Create modules_packages.py with user-defined module and usage of standard modules (os, sys, datetime, json, calendar, random, math, collections)
+- [x] Create tkinter_gui.py with Tkinter app including text, canvas, button, form elements
+- [x] Create mysql_pos.py with mini POS system connecting to MySQL (login, create product pages)

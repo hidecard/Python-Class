@@ -1,0 +1,110 @@
+import mysql.connector
+from datetime import datetime
+
+class Database:
+    def __init__(self):
+        self.connection = None
+        self.connect()
+
+    def connect(self):
+        try:
+            self.connection = mysql.connector.connect(
+                host="localhost",
+                port=3306,
+                user="root",
+                password="hidecard",
+                database="pos_db"
+            )
+            print("Database connected successfully.")
+        except mysql.connector.Error as e:
+            raise Exception(f"Failed to connect to database: {e}")
+
+    def setup_database(self):
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                port=3306,
+                user="root",
+                password="hidecard",
+            )
+            cursor = conn.cursor()
+            cursor.execute("CREATE DATABASE IF NOT EXISTS pos_db")
+            cursor.execute("USE pos_db")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    username VARCHAR(255) UNIQUE,
+                    password VARCHAR(255)
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS categories (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255)
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS items (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255),
+                    price DECIMAL(10,2),
+                    barcode VARCHAR(255),
+                    category_id INT,
+                    FOREIGN KEY (category_id) REFERENCES categories(id)
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS staff (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255),
+                    role VARCHAR(255)
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS safe_transactions (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    amount DECIMAL(10,2),
+                    type VARCHAR(50),
+                    date DATETIME
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS sales (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    item_id INT,
+                    quantity INT,
+                    total DECIMAL(10,2),
+                    date DATETIME,
+                    staff_id INT,
+                    FOREIGN KEY (item_id) REFERENCES items(id),
+                    FOREIGN KEY (staff_id) REFERENCES staff(id)
+                )
+            """)
+            # Insert default user
+            cursor.execute("INSERT IGNORE INTO users (username, password) VALUES ('admin', 'password')")
+            conn.commit()
+            conn.close()
+            print("Database setup complete.")
+        except mysql.connector.Error as e:
+            raise Exception(f"Database setup failed: {e}")
+
+    def execute_query(self, query, params=None):
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query, params or ())
+            self.connection.commit()
+            return cursor
+        except mysql.connector.Error as e:
+            raise Exception(f"Query execution failed: {e}")
+
+    def fetch_all(self, query, params=None):
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query, params or ())
+            return cursor.fetchall()
+        except mysql.connector.Error as e:
+            raise Exception(f"Fetch failed: {e}")
+
+    def close(self):
+        if self.connection:
+            self.connection.close()
