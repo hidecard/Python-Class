@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from tkcalendar import DateEntry
 from datetime import datetime
 
 class SafeListFrame(tk.Frame):
@@ -12,7 +13,16 @@ class SafeListFrame(tk.Frame):
         title_label = tk.Label(self, text="Safe Transactions Report", font=("Arial", 16, "bold"))
         title_label.pack(pady=20)
 
+        # Search frame
+        search_frame = tk.Frame(self)
+        search_frame.pack(pady=10)
 
+        tk.Label(search_frame, text="Search by Date:", font=("Arial", 10, "bold")).grid(row=0, column=0, sticky="w", pady=5, padx=10)
+        self.date_entry = DateEntry(search_frame, font=("Arial", 12), width=12, date_pattern='yyyy-mm-dd')
+        self.date_entry.grid(row=0, column=1, pady=5, padx=10)
+
+        tk.Button(search_frame, text="Search", bg="#FF9800", fg="white", width=10, command=self.search_transactions).grid(row=0, column=4, padx=10)
+        tk.Button(search_frame, text="Clear", bg="#9E9E9E", fg="white", width=10, command=self.clear_search).grid(row=0, column=5, padx=10)
 
         # Treeview
         tree_frame = tk.Frame(self)
@@ -55,6 +65,29 @@ class SafeListFrame(tk.Frame):
                 self.safe_tree.insert("", tk.END, values=trans)
         except Exception as e:
             messagebox.showerror("Database Error", str(e))
+
+    def search_transactions(self):
+        date_filter = self.date_entry.get_date().strftime('%Y-%m-%d') if self.date_entry.get() else ""
+
+        query = "SELECT st.id, st.amount, st.type, st.date, COALESCE(s.name, 'Unknown') FROM safe_transactions st LEFT JOIN staff s ON st.staff_id = s.id"
+        params = []
+
+        if date_filter:
+            query += " WHERE DATE(st.date) = %s"
+            params.append(date_filter)
+
+        for item in self.safe_tree.get_children():
+            self.safe_tree.delete(item)
+        try:
+            transactions = self.db.fetch_all(query, params)
+            for trans in transactions:
+                self.safe_tree.insert("", tk.END, values=trans)
+        except Exception as e:
+            messagebox.showerror("Database Error", str(e))
+
+    def clear_search(self):
+        self.date_entry.set_date(datetime.now())
+        self.load_safe_transactions()
 
 
 
